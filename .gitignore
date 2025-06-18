@@ -200,4 +200,4 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-insertion/csv_files/
+#insertion/csv_files/
