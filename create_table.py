@@ -44,3 +44,43 @@ else:
     """
     client.command(create_table_sql)
     print(f"✅ Table '{TABLE_NAME}' créée avec succès.")
+
+
+CLIENT_TABLE = 'client'
+
+# Vérifie si la table existe déjà
+if CLIENT_TABLE in table_names:
+    print(f"✅ La table '{CLIENT_TABLE}' existe déjà dans la base '{DATABASE}'.")
+else:
+    print(f"🚧 La table '{CLIENT_TABLE}' n'existe pas, création en cours...")
+
+    create_client_table_sql = f"""
+    CREATE TABLE {CLIENT_TABLE} (
+        n_clicks                 UInt64,
+        n_carts                  UInt64,
+        n_purchases              UInt64,
+        cart_to_click_ratio      Float64,
+        purchase_to_cart_ratio   Float64,
+        purchase_to_click_ratio  Float64,
+        unique_products          UInt64,
+        unique_categories        UInt64,
+        most_common_category     LowCardinality(String),
+        most_common_brand        LowCardinality(String),
+        n_sessions               UInt64,
+        avg_session_len_sec      Float64,
+        user_lifespan_days       Float64,
+        avg_decision_delay_sec   Float64,
+        product_revisit_rate     Float64,
+        total_spent              Float32,
+        avg_item_value           Float32,
+        modal_hour               Int32,
+        modal_weekday            Int32,
+        recency_days             Float64,
+        first_event              DateTime64(3, 'UTC'),
+        last_event               DateTime64(3, 'UTC')
+    )
+    ENGINE = MergeTree
+    ORDER BY (last_event, n_clicks);
+    """
+    client.command(create_client_table_sql)
+    print(f"✅ Table '{CLIENT_TABLE}' créée avec succès.")
