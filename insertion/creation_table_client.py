@@ -19,6 +19,30 @@ client = get_client(
 
 # =========== SQL de calcul et insertion des métriques utilisateur =========== #
 sql = """
+-- CTE pour les top marques et catégories
+WITH
+    (
+        SELECT groupArray(brand)
+        FROM (
+            SELECT brand
+            FROM events
+            GROUP BY brand
+            ORDER BY COUNT(*) DESC
+            LIMIT 50
+        )
+    ) AS top_brands,
+
+    (
+        SELECT groupArray(category_code_1)
+        FROM (
+            SELECT category_code_1
+            FROM events
+            GROUP BY category_code_1
+            ORDER BY COUNT(*) DESC
+            LIMIT 20
+        )
+    ) AS top_categories
+
 INSERT INTO client
 SELECT
     countIf(event_type = 'view') AS n_clicks,
@@ -30,10 +54,10 @@ SELECT
     n_purchases / nullIf(n_clicks, 0) AS purchase_to_click_ratio,
 
     uniqExact(product_id) AS unique_products,
-    uniqExact(category_code_1) AS unique_categories,
+    uniqExact(category_code_1_clean) AS unique_categories,
 
-    argMax(category_code_1, category_count) AS most_common_category,
-    argMax(brand, brand_count) AS most_common_brand,
+    argMax(category_code_1_clean, category_count) AS most_common_category,
+    argMax(brand_clean, brand_count) AS most_common_brand,
 
     uniqExact(user_session) AS n_sessions,
 
@@ -66,8 +90,11 @@ FROM (
         toHour(event_time) AS hour,
         toDayOfWeek(event_time) AS weekday,
 
-        count() OVER (PARTITION BY user_id, category_code_1) AS category_count,
-        count() OVER (PARTITION BY user_id, brand) AS brand_count,
+        if(brand IN top_brands, brand, 'Other') AS brand_clean,
+        if(category_code_1 IN top_categories, category_code_1, 'Other') AS category_code_1_clean,
+
+        count() OVER (PARTITION BY user_id, category_code_1_clean) AS category_count,
+        count() OVER (PARTITION BY user_id, brand_clean) AS brand_count,
         count() OVER (PARTITION BY user_id, hour) AS hour_count,
         count() OVER (PARTITION BY user_id, weekday) AS weekday_count,
 
@@ -88,3 +115,5 @@ try:
     print("✅ Calcul des métriques utilisateur terminé avec succès et inséré dans 'client'.")
 except Exception as e:
     print(f"❌ Erreur lors de l'exécution du SQL : {e}")
+
+
