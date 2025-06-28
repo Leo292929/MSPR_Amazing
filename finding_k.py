@@ -8,6 +8,12 @@ preprocessor = build_preprocessor_from_sample(sample_size = 100000)
 
 X = stream_user_metrics_by_id_range(preprocessor, start_id=0, end_id=10000)
 
+print(X.head(5))
+
+nan_counts = X.isna().sum()
+nan_counts = nan_counts[nan_counts > 0]
+print(nan_counts)
+
 inertias = []
 k_values = range(1, 15)
 

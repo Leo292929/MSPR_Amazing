@@ -69,6 +69,9 @@ def build_preprocessor_from_sample(
     df[float_cols] = df[float_cols].astype('float32')
     df[int_cols] = df[int_cols].astype('int32')
 
+    # Remplacement des NaN dans avg_item_value par 0
+    df['avg_item_value'].fillna(0, inplace=True)
+
     # Construction du préprocesseur
     scaler = StandardScaler()
     encoder = OneHotEncoder(
@@ -130,7 +133,7 @@ def stream_user_metrics_by_id_range(
         'modal_hour', 'modal_weekday', 'recency_days'
     ]
     categorical_features = ['most_common_category', 'most_common_brand']
-    selected_columns = ['user_id'] + numeric_features + categorical_features
+    selected_columns = ['id_client'] + numeric_features + categorical_features
 
     query = f"""
     SELECT {', '.join(selected_columns)}
@@ -157,6 +160,9 @@ def stream_user_metrics_by_id_range(
     df[float_cols] = df[float_cols].astype('float32')
     df[int_cols] = df[int_cols].astype('int32')
 
+    # Remplacer les NaN dans avg_item_value
+    df['avg_item_value'].fillna(0, inplace=True)
+
     # Transformation
     X = preprocessor.transform(df[numeric_features + categorical_features])
     ohe = preprocessor.named_transformers_['cat']
@@ -165,6 +171,6 @@ def stream_user_metrics_by_id_range(
     X_df = pd.DataFrame(X, columns=all_columns)
 
     # Ajouter user_id pour suivi
-    X_df['user_id'] = df['user_id'].values
+    X_df['id_client'] = df['id_client'].values
 
     return X_df

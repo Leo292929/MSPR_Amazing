@@ -56,6 +56,8 @@ else:
 
     create_client_table_sql = f"""
     CREATE TABLE {CLIENT_TABLE} (
+        id_client                UInt32,
+        user_id                  UInt64,
         n_clicks                 UInt64,
         n_carts                  UInt64,
         n_purchases              UInt64,
@@ -75,12 +77,10 @@ else:
         avg_item_value           Float32,
         modal_hour               Int32,
         modal_weekday            Int32,
-        recency_days             Float64,
-        first_event              DateTime64(3, 'UTC'),
-        last_event               DateTime64(3, 'UTC')
+        recency_days             Float64
     )
     ENGINE = MergeTree
-    ORDER BY (last_event, n_clicks);
+    ORDER BY (id_client);
     """
     client.command(create_client_table_sql)
     print(f"✅ Table '{CLIENT_TABLE}' créée avec succès.")

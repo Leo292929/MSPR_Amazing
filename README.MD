@@ -5,3 +5,4 @@ dans l'ordre :
     - traitement_insertion
     - creation_table_client
     - load_client_data
+    - finding_k
