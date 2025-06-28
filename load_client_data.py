@@ -49,7 +49,7 @@ def build_preprocessor_from_sample(
     query = f"""
     SELECT {', '.join(selected_columns)}
     FROM {table}
-    SAMPLE 0.1
+    ORDER BY rand()
     LIMIT {sample_size}
     """
     result = client.query(query)
@@ -105,6 +105,12 @@ def stream_user_metrics_by_id_range(
     database='default',
     table='client'
 ) -> pd.DataFrame:
+    
+    '''
+    renvoie une portion du dataset, entre start_id et end_id
+    normalisé et one hot encodé 
+    '''
+
     from clickhouse_connect import get_client
     client = get_client(
         host=host,
